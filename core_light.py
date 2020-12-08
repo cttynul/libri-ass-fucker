@@ -28,14 +28,19 @@ def dump(authors, sleep_time=2, bformat="epub"):
                 
                 print("Downloaded author page")
                 cartella = './d/'+author+'/'
-                                
+                choice="y"                
                 if not os.path.isdir(cartella):
                     os.mkdir(cartella)
                 else:
                     choice=input("La cartella esiste già. Vuoi riscaricare questo autore? y/n: ")
-
                 if choice=="y":
                     books = re.findall(reg_ex_interno, str(respData))
+                    print("Verranno scaricati:")
+                    for b in books:
+                        print(b)
+                    c=input("Press enter to continue, type 0 to abort: ")
+                    if c == '0':
+                        break
                     for book in books:
                         if "Directory" not in book:
                             print("Progessing book " + book)
@@ -72,7 +77,7 @@ def dump(authors, sleep_time=2, bformat="epub"):
                                 except:
                                     print("Something bad happened :/")
                 
-            except: print("Something Happened, I don't know what and I don't give a fuck about.")
+            except: print("Something Happened, I don't know what and I don't give a fuck about. If u didn't select 'epub', try to do it now")
         print("===============================================================\n\n\n\n\n")
         run()
     except KeyboardInterrupt:
@@ -86,9 +91,12 @@ def search_author(user_input):
         if user_input in author: 
             match.append(author)
             break
-    if match: return match
-    else: return False
-
+    
+    if len(match)>0: 
+        return match
+    print("Author is not in the DB")
+    input("Press any key to continue")
+    return False
 
 def print_logo():
     print("\n██╗     ██╗██████╗ ██████╗ ██╗████████╗███████╗██╗")     
@@ -96,63 +104,46 @@ def print_logo():
     print("██║     ██║██████╔╝██████╔╝██║   ██║   █████╗  ██║")     
     print("██║     ██║██╔══██╗██╔══██╗██║   ██║   ██╔══╝  ██║")     
     print("███████╗██║██████╔╝██║  ██║██║██╗██║   ███████╗███████╗")
-    print("╚══════╝╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝╚═╝╚═╝   ╚══════╝╚══════╝\nYou just fucked with the wrong person.\n")
+    print("╚══════╝╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝╚═╝╚═╝   ╚══════╝╚══════╝\n\n")
                                                       
 def why():
     print("\n===============================================================")
-    print("Q. Why this?")
-    print("A. They fucked with the wrong person.")
     print("Q. Why attack someone who supports free culture?")
     print("A. This is not free culture, this is piracy. If you republish a book or a movie after 1 year it's free culture, if you do the same after 1 day it's piracy.")
     print("\nOn their website they say that links are provided by hosting provider: WRONG.\nOn their website there are a ton of ads, shortlink and shit like this.\nThey say 'we love free culture'? Ok, let's make culture free again without ads :) (semi cit.)\n===============================================================")
-    k = input("Press enter to go back ")
-    print_logo()
-    menu()
+    print("\n===============================================================")
+    
 
-def menu():
+def menu2():
     choice = "99"
     while choice == "99":
-        print("[1] Download specific author.")
-        print("[2] Download entire DB.")
-        print("[3] Why this?")
-        print("[0] Exit.")
-        choice = input("Please make a choice: ")
-        if choice == "1": 
+        choice=input("type \"exit\" to close the app, an author to search in the DB: ")
+        if choice == "exit": exit(0)
+        else:
             print("===============================================================")
-            author = input("Insert author name [ex. Dante Aligheri or Dante] ")
+            author = choice
             match = search_author(author)
-            if match:
+            
+            if match is bool:
+                print("===============================================================\nCannot find " + author + " in DB, you spelt it wrong?") 
+                choice = 99
+            elif match is not False and len(match) > 0:
                 print("===============================================================\nAuthor found!\n[1] EPUB\n[2] MOBI\n[3] PDF\n[0] Exit")
                 ext = input("Choice format [1-3, default epub] ")
                 if ext == "2": bformat = "mobi"
                 elif ext == "3": bformat = "pdf"
                 elif ext == "0": 
-                    print("")
+                    print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
                     run()
                 else: bformat = "epub"
                 print("===============================================================") 
                 dump(authors = match, sleep_time=2, bformat=bformat)
-            else:
-                print("===============================================================\nCannot find " + author + " in DB, you spelt it wrong?") 
-                choice = 99
-        elif choice == "2": 
-            print("===============================================================\n[1] EPUB\n[2] MOBI\n[3] PDF\n[0] Exit")
-            ext = input("Choice format [1-3, default epub] ")
-            if ext == "2": bformat = "mobi"
-            elif ext == "3": bformat = "pdf"
-            elif ext == "0": exit(0)
-            else: bformat = "epub"
-            print("===============================================================\nCAUTION! It could take SOOOOOO long!")
-            yn = input("Continue? [y/n] ")
-            if yn.lower() == "y":
-                print("===============================================================")
-                dump(authors = get_all_authors(), sleep_time=2, bformat=bformat)
-            else: exit(0)
-        elif choice == "3": why()
-        elif choice == "0": exit(0)
-        else: print("You can't even choice a number between 0 and 3, c'mon.")
+            else: menu2()
+
+
 
 def run():
     print_logo()
-    menu()
+    why()
+    menu2()
 
