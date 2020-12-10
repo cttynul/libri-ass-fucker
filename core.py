@@ -9,7 +9,8 @@ def dump(authors, sleep_time=2, bformat="epub"):
     reg_ex_interno = r'a href="\/book-n[^>]+>([^<]+)'
     if bformat == "mobi": reg_ex_books = r'>([^\.]+\.mobi)<\/a>'
     elif bformat == "pdf": reg_ex_books = r'>([^\.]+\.pdf)<\/a>'
-    else: reg_ex_books = r'>([^\.]+\.epub)<\/a>'
+    elif bformat == "epub": reg_ex_books = r'>([^\.]+\.epub)<\/a>'
+    else: reg_ex_books = r'>([^\.]+\.[epub|pdf|mobi]+)<\/a>'
     base_url = "aHR0cHM6Ly9kd25sZy50ZWwvYm9vay1uLw==" #b64 to evoid being triggered by target searches
 
     try:
@@ -23,7 +24,7 @@ def dump(authors, sleep_time=2, bformat="epub"):
                 resp = urllib.request.urlopen(req)
                 respData = resp.read()
                 print("Downloaded author page")
-                author_folder = os.path.join(".", "download", author)
+                author_folder = os.path.join(".", "download", author.title().replace("-", " "))
                 if not os.path.isdir(author_folder): os.makedirs(author_folder)
 
                 books = re.findall(reg_ex_interno, str(respData))
@@ -50,6 +51,7 @@ def dump(authors, sleep_time=2, bformat="epub"):
                                 )
                                 definitive_filename = filename.title()
                                 definitive_filename = definitive_filename.replace("Epub", "epub").replace("Pdf", "pdf").replace(".Mobi", ".mobi")
+                                print("************\n"+definitive_filename+"\n**********")
                                 out_file = open(os.path.join(author_folder, definitive_filename), 'wb')
                                 with urllib.request.urlopen(download_url) as response:
                                     print("===============================================================")
@@ -122,17 +124,18 @@ def menu():
                 print("===============================================================\nCannot find " + author + " in DB, you spelt it wrong?") 
                 choice = 99
         elif choice == "2": 
-            print("===============================================================\n[1] EPUB\n[2] MOBI\n[3] PDF\n[0] Exit")
-            ext = input("Choice format [1-3, default epub] ")
+            print("===============================================================\n[1] EPUB\n[2] MOBI\n[3] PDF\n[4] All\n[0] Exit")
+            ext = input("Choice format [1-4, default epub] ")
             if ext == "2": bformat = "mobi"
             elif ext == "3": bformat = "pdf"
+            elif ext == "4": bformat = "all"
             elif ext == "0": exit(0)
             else: bformat = "epub"
             print("===============================================================\nCAUTION! It could take SOOOOOO long!")
             yn = input("Continue? [y/n] ")
             if yn.lower() == "y":
                 print("===============================================================")
-                dump(authors = get_all_authors(), sleep_time=2, bformat=bformat)
+                dump(authors = get_all_authors(), sleep_time=1, bformat=bformat)
             else: exit(0)
         elif choice == "3": why()
         elif choice == "0": exit(0)
